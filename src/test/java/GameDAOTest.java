@@ -25,66 +25,50 @@ public class GameDAOTest {
     @Autowired
     RoundDAO roundDao;
 
+    Game game1;
+    Game game2;
+
     @Before
     public void setUp(){
         removeAllFromDB(gameDao, roundDao);
-    }
-
-    @After
-    public void finish(){
-        removeAllFromDB(gameDao, roundDao);
-    }
-
-    @Test
-    public void insertTest(){
-        Game game = new Game();
-        game.setCorrectAnswer(1234);
-        game.setFinished(false);
-        game = gameDao.insertGame(game);
-
-        // Ensure that the Game object retrieved is as expected
-        Game fromDao = gameDao.getGame(game.getGameId());
-        assertEquals(game, fromDao);
-    }
-
-    @Test
-    public void updateTest(){
-        Game game = new Game();
-        game.setCorrectAnswer(1234);
-        game.setFinished(false);
-
-        // Assume that insertGame works properly. Inserted with finished = false
-        game = gameDao.insertGame(game);
-
-        // Now perform update
-        game.setFinished(true);
-        Game fromDao = gameDao.getGame(game.getGameId());
-
-        // Ensure that the DTO is updated BUT NOT IN DATABASE
-        assertNotEquals(game, fromDao);
-
-        // Update the database now...
-        gameDao.updateGame(game);
-
-        // Check that now the object retrieved from database is correct
-        fromDao = gameDao.getGame(game.getGameId());
-        assertEquals(game, fromDao);
-    }
-
-    @Test
-    public void getAllTest(){
-        Game game1 = new Game();
+        game1 = new Game();
         game1.setCorrectAnswer(1234);
         game1.setFinished(false);
         game1 = gameDao.insertGame(game1);
 
-        Game game2 = new Game();
+        game2 = new Game();
         game2.setCorrectAnswer(5678);
         game2.setFinished(false);
         game2 = gameDao.insertGame(game2);
+    }
 
+    @Test
+    public void insertTest(){
+        // Ensure that the Game object retrieved is as expected
+        Game fromDao = gameDao.getGame(game1.getGameId());
+        assertEquals(game1, fromDao);
+    }
+
+    @Test
+    public void updateTest(){
+        // Now perform update
+        game1.setFinished(true);
+        Game fromDao = gameDao.getGame(game1.getGameId());
+
+        // Ensure that the DTO is updated BUT NOT IN DATABASE
+        assertNotEquals(game1, fromDao);
+
+        // Update the database now...
+        gameDao.updateGame(game1);
+
+        // Check that now the object retrieved from database is correct
+        fromDao = gameDao.getGame(game1.getGameId());
+        assertEquals(game1, fromDao);
+    }
+
+    @Test
+    public void getAllTest(){
         List<Game> games = gameDao.getGames();
-
         assertEquals(2, games.size());
         assertTrue(games.contains(game1));
         assertTrue(games.contains(game2));
@@ -92,16 +76,6 @@ public class GameDAOTest {
 
     @Test
     public void getTest(){
-        Game game1 = new Game();
-        game1.setCorrectAnswer(1234);
-        game1.setFinished(false);
-        game1 = gameDao.insertGame(game1);
-
-        Game game2 = new Game();
-        game2.setCorrectAnswer(5678);
-        game2.setFinished(false);
-        game2 = gameDao.insertGame(game2);
-
         // We have inserted two games. Now try to extract them
         // based on their Id.
         Game fromDao1 = gameDao.getGame(game1.getGameId());

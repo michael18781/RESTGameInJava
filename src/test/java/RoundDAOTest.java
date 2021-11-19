@@ -32,46 +32,31 @@ public class RoundDAOTest {
     @Autowired
     RoundDAO roundDao;
 
+    Game game1;
+    Game game2;
+
     @Before
     public void setUp(){
         GameDAOTest.removeAllFromDB(gameDao, roundDao);
+
+        game1 = new Game();
+        game1.setCorrectAnswer(1234);
+        game1.setFinished(false);
+        game1 = gameDao.insertGame(game1);
+
+        game2 = new Game();
+        game2.setCorrectAnswer(5678);
+        game2.setFinished(false);
+        game2 = gameDao.insertGame(game2);
     }
 
-    @After
-    public void finish(){
-        GameDAOTest.removeAllFromDB(gameDao, roundDao);
-    }
-
-    @Test
-    public void saveTest(){
-        // Test to check rounds are saved correctly
-        Game game = new Game();
-        game.setCorrectAnswer(1234);
-        game.setFinished(false);
-        game = gameDao.insertGame(game);
-
-        // Create a round and insert into DB
-        Round round = new Round();
-        round.setGameId(game.getGameId());
-        round.setRoundStarted(Timestamp.valueOf(LocalDateTime.now()));
-        round.setResult("e:2:p:1");
-        round = roundDao.saveRound(round);
-
-        Round fromDao = roundDao.getRound(round.getRoundId());
-        assertEquals(round, fromDao);
-    }
 
     @Test
     public void deleteByIdTest(){
         // Test to check delete of rounds by Id
-        Game game = new Game();
-        game.setCorrectAnswer(1234);
-        game.setFinished(false);
-        game = gameDao.insertGame(game);
-
         // Create a round and insert into DB
         Round round = new Round();
-        round.setGameId(game.getGameId());
+        round.setGameId(game1.getGameId());
         round.setRoundStarted(Timestamp.valueOf(LocalDateTime.now()));
         round.setResult("e:2:p:1");
         round = roundDao.saveRound(round);
@@ -80,24 +65,12 @@ public class RoundDAOTest {
         roundDao.deleteRoundById(round.getRoundId());
 
         int roundIdDeleted = round.getRoundId();
-        assertThrows(EmptyResultDataAccessException.class, () -> {
-            roundDao.getRound(roundIdDeleted);
-        });
+        assertThrows(EmptyResultDataAccessException.class, () -> roundDao.getRound(roundIdDeleted));
     }
 
     @Test
     public void getAllByGameIdTest(){
         // Test to check all rounds by game can be found
-        Game game1 = new Game();
-        game1.setCorrectAnswer(1234);
-        game1.setFinished(false);
-        game1 = gameDao.insertGame(game1);
-
-        Game game2 = new Game();
-        game2.setCorrectAnswer(5678);
-        game2.setFinished(false);
-        game2 = gameDao.insertGame(game2);
-
         Random rand = new Random();
 
         // Create a set of rounds for game1
@@ -134,13 +107,8 @@ public class RoundDAOTest {
     @Test
     public void getByIdTest(){
         // Test to check a given round by id is returned
-        Game game = new Game();
-        game.setCorrectAnswer(1234);
-        game.setFinished(false);
-        game = gameDao.insertGame(game);
-
         Round gameRound = new Round();
-        gameRound.setGameId(game.getGameId());
+        gameRound.setGameId(game1.getGameId());
         gameRound.setRoundStarted(Timestamp.valueOf(LocalDateTime.now()));
         gameRound.setResult("e:2:p:1");
 
