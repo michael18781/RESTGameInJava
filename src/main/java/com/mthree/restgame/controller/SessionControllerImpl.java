@@ -21,12 +21,15 @@ public class SessionControllerImpl implements SessionController {
     @Override
     public ResponseEntity<Game> begin(){
         Game newGame = service.beginGame();
+        // Begin a new game, retrieve the object, and censor it as it won't have finished yet. Return with status CREATED
         return new ResponseEntity<>(service.censorGame(newGame), HttpStatus.CREATED);
     }
 
     @PostMapping("/guess")
     @Override
     public ResponseEntity<Round> guess(@RequestParam("guess") int guess, @RequestParam("gameId") int gameId){
+        // Making a guess and returning it along with ACCEPTED status to show that the request has been received and dealt
+        // with
         return new ResponseEntity<>(service.makeGuess(guess, gameId), HttpStatus.ACCEPTED);
     }
 
@@ -34,7 +37,7 @@ public class SessionControllerImpl implements SessionController {
     @Override
     public ResponseEntity<List<Game>> game() {
         List<Game> games = service.findAllGames();
-        // Loop to set "correctAnswer" to zero if the game is not finished
+        // Loop to set "correctAnswer" to -1 if the game is not finished
         // so that the user can't cheat...
         games.forEach(service::censorGame);
         return new ResponseEntity<>(games, HttpStatus.OK);

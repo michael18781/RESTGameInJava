@@ -6,12 +6,13 @@ import com.mthree.restgame.dao.RoundDAO;
 import com.mthree.restgame.dto.Game;
 import com.mthree.restgame.dto.Round;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Component
+@Service
 public class GameServiceImpl implements GameService {
     private final static int NUM_DIGITS = 4;
 
