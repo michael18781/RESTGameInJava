@@ -4,6 +4,7 @@ import com.mthree.restgame.dto.Game;
 import com.mthree.restgame.dto.Round;
 
 import java.util.List;
+import java.util.Map;
 
 public interface GameService {
     Game censorGame(Game g);
@@ -13,5 +14,5 @@ public interface GameService {
     Game findGameById(int gameId);
     int genAnswer();
     List<Round> findRoundsByGameId(int gameId);
-    int[] computeMatches(int guess, int correct);
+    Map<String, Integer> computeMatches(int guess, int correct);
 }

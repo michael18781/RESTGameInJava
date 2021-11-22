@@ -14,7 +14,7 @@ import java.util.*;
 @Component
 public class GameServiceImpl implements GameService {
     private final static int NUM_DIGITS = 4;
-    private Game currentGame;
+
     private final GameDAO gameDao;
     private final RoundDAO roundDao;
     private final Random rand;
@@ -45,13 +45,8 @@ public class GameServiceImpl implements GameService {
         int newAnswer = genAnswer();
 
         // Repeatedly generate an answer until we get one with unique digits
-        while (true) {
-            try {
-                validateIntegerForUniqueDigits(newAnswer);
-                break;
-            } catch (NumberFormatException ex){
-                newAnswer = genAnswer();
-            }
+        while (NotUniqueDigits(newAnswer)) {
+            newAnswer = genAnswer();
         }
 
         newGame.setCorrectAnswer(newAnswer);
@@ -78,7 +73,9 @@ public class GameServiceImpl implements GameService {
         }
 
         // Checking for uniqueness of guess i.e. each digit is different
-        validateIntegerForUniqueDigits(guess);
+        if(NotUniqueDigits(guess)){
+            throw new NumberFormatException("Duplicate digits in your guess. Please make another!");
+        }
 
         // Creating the round with initial data
         Round newRound = new Round();
@@ -86,9 +83,9 @@ public class GameServiceImpl implements GameService {
         newRound.setRoundStarted(Timestamp.valueOf(LocalDateTime.now()));
 
         // Calculating and setting the number of exact and partial matches for a given round.
-        int[] matches = computeMatches(guess, gameToGuessOn.getCorrectAnswer());
-        int exactMatches = matches[0];
-        int partialMatches = matches[1];
+        Map<String, Integer> results = computeMatches(guess, gameToGuessOn.getCorrectAnswer());
+        int exactMatches = results.get("EXACT");
+        int partialMatches = results.get("PARTIAL");
 
         // Setting the result
         newRound.setResult(String.format("e:%s:p:%s", exactMatches, partialMatches));
@@ -122,7 +119,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public int[] computeMatches(int guess, int correct){
+    public Map<String, Integer> computeMatches(int guess, int correct){
         int exact = 0;
         int partials = 0;
 
@@ -141,10 +138,14 @@ public class GameServiceImpl implements GameService {
             if(correctChars.get(i) == guessChars.get(i)) exact++; partials--;
         }
 
-        return new int[]{exact, partials};
+        // Create a hashmap to store the results of the game to be written out by the service
+        Map<String, Integer> results = new HashMap<>();
+        results.put("EXACT", exact);
+        results.put("PARTIAL", partials);
+        return results;
     }
 
-    private void validateIntegerForUniqueDigits(int guess){
+    private boolean NotUniqueDigits(int guess){
         // Check that all the digits are unique in the users guess.
         HashSet<Integer> seen = new HashSet<>();
         int val = guess;
@@ -152,10 +153,11 @@ public class GameServiceImpl implements GameService {
         while(val > 0){
             int digit = val % 10;
             // Found a digit to be repeated hence throw an exception
-            if (seen.contains(digit)) throw new NumberFormatException("Duplicate digits in guess!");
+            if (seen.contains(digit)) return true;
 
             // Found a new digit so add to digit set
             else seen.add(digit); val /= 10;
         }
+        return false;
     }
 }

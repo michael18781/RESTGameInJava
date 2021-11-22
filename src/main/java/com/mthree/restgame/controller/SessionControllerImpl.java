@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/")
 public class SessionControllerImpl implements SessionController {
+
     @Autowired
     private GameService service;
 
