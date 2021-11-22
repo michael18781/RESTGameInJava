@@ -43,9 +43,6 @@ public class SessionControllerImpl implements SessionController {
     @Override
     public ResponseEntity<Game> gameById(@PathVariable("gameId") int gameId) {
         Game gameFound = service.findGameById(gameId);
-        System.out.println(service.censorGame(gameFound));
-        System.out.println(gameFound);
-
         // Again, checking if we have finished otherwise displaying 0 for the answer
         return new ResponseEntity<>(service.censorGame(gameFound), HttpStatus.OK);
     }

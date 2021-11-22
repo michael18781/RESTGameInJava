@@ -3,7 +3,6 @@ import com.mthree.restgame.dao.GameDAO;
 import com.mthree.restgame.dao.RoundDAO;
 import com.mthree.restgame.dto.Game;
 import com.mthree.restgame.dto.Round;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,23 +33,29 @@ public class GameDAOTest {
         game1 = new Game();
         game1.setCorrectAnswer(1234);
         game1.setFinished(false);
-        game1 = gameDao.insertGame(game1);
 
         game2 = new Game();
         game2.setCorrectAnswer(5678);
         game2.setFinished(false);
-        game2 = gameDao.insertGame(game2);
     }
 
     @Test
     public void insertTest(){
+        game1 = gameDao.insertGame(game1);
+        game2 = gameDao.insertGame(game2);
+
         // Ensure that the Game object retrieved is as expected
-        Game fromDao = gameDao.getGame(game1.getGameId());
-        assertEquals(game1, fromDao);
+        Game fromDao1 = gameDao.getGame(game1.getGameId());
+        assertEquals(game1, fromDao1);
+
+        Game fromDao2 = gameDao.getGame(game2.getGameId());
+        assertEquals(game2, fromDao2);
     }
 
     @Test
     public void updateTest(){
+        game1 = gameDao.insertGame(game1);
+
         // Now perform update
         game1.setFinished(true);
         Game fromDao = gameDao.getGame(game1.getGameId());
@@ -68,6 +73,9 @@ public class GameDAOTest {
 
     @Test
     public void getAllTest(){
+        game1 = gameDao.insertGame(game1);
+        game2 = gameDao.insertGame(game2);
+
         List<Game> games = gameDao.getGames();
         assertEquals(2, games.size());
         assertTrue(games.contains(game1));
@@ -76,6 +84,9 @@ public class GameDAOTest {
 
     @Test
     public void getTest(){
+        game1 = gameDao.insertGame(game1);
+        game2 = gameDao.insertGame(game2);
+
         // We have inserted two games. Now try to extract them
         // based on their Id.
         Game fromDao1 = gameDao.getGame(game1.getGameId());

@@ -34,6 +34,7 @@ public class RoundDAOTest {
 
     Game game1;
     Game game2;
+    Round gameRound;
 
     @Before
     public void setUp(){
@@ -48,6 +49,11 @@ public class RoundDAOTest {
         game2.setCorrectAnswer(5678);
         game2.setFinished(false);
         game2 = gameDao.insertGame(game2);
+
+        gameRound = new Round();
+        gameRound.setGameId(game1.getGameId());
+        gameRound.setRoundStarted(Timestamp.valueOf(LocalDateTime.now()));
+        gameRound.setResult("e:2:p:1");
     }
 
 
@@ -55,16 +61,12 @@ public class RoundDAOTest {
     public void deleteByIdTest(){
         // Test to check delete of rounds by Id
         // Create a round and insert into DB
-        Round round = new Round();
-        round.setGameId(game1.getGameId());
-        round.setRoundStarted(Timestamp.valueOf(LocalDateTime.now()));
-        round.setResult("e:2:p:1");
-        round = roundDao.saveRound(round);
+        gameRound = roundDao.saveRound(gameRound);
 
         // Now try to delete the round and hope for an error when no rounds found
-        roundDao.deleteRoundById(round.getRoundId());
+        roundDao.deleteRoundById(gameRound.getRoundId());
 
-        int roundIdDeleted = round.getRoundId();
+        int roundIdDeleted = gameRound.getRoundId();
         assertThrows(EmptyResultDataAccessException.class, () -> roundDao.getRound(roundIdDeleted));
     }
 
@@ -73,28 +75,24 @@ public class RoundDAOTest {
         // Test to check all rounds by game can be found
         Random rand = new Random();
 
-        // Create a set of rounds for game1
+        // Add a round for the first game to ensure that not all rounds in the DB
+        // are from the same game i.e. when finding all from game2, it should leave
+        // out this one.
+        roundDao.saveRound(gameRound);
+
+        // Create a set of rounds for game2
         int NUM_ROUNDS_TEST = 10;
         ArrayList<Round> createdRounds = new ArrayList<>();
         for(int i = 0; i < NUM_ROUNDS_TEST; i++){
             Round gameRound = new Round();
-            gameRound.setGameId(game1.getGameId());
+            gameRound.setGameId(game2.getGameId());
             gameRound.setRoundStarted(Timestamp.valueOf(LocalDateTime.now()));
             gameRound.setResult(String.format("e:%s:p:%s", rand.nextInt(4), rand.nextInt(4)));
             createdRounds.add(roundDao.saveRound(gameRound));
         }
 
-        // Add a round for the second game to ensure that not all rounds in the DB
-        // are from the same game i.e. when finding all from game1, it should leave
-        // out this one.
-        Round roundForSecondGame = new Round();
-        roundForSecondGame.setGameId(game2.getGameId());
-        roundForSecondGame.setRoundStarted(Timestamp.valueOf(LocalDateTime.now()));
-        roundForSecondGame.setResult("e:2:p:1");
-        roundDao.saveRound(roundForSecondGame);
-
         // Get all rounds from the DB and ensure size matches what we inserted
-        List<Round> retrievedRounds = roundDao.getRoundsByGame(game1.getGameId());
+        List<Round> retrievedRounds = roundDao.getRoundsByGame(game2.getGameId());
         assertEquals(createdRounds.size(), retrievedRounds.size());
 
         // Go through every element in the createdRounds and check they are in
@@ -107,11 +105,6 @@ public class RoundDAOTest {
     @Test
     public void getByIdTest(){
         // Test to check a given round by id is returned
-        Round gameRound = new Round();
-        gameRound.setGameId(game1.getGameId());
-        gameRound.setRoundStarted(Timestamp.valueOf(LocalDateTime.now()));
-        gameRound.setResult("e:2:p:1");
-
         // Save it and retrieve the ID
         gameRound = roundDao.saveRound(gameRound);
 
